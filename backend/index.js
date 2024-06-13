@@ -3,6 +3,7 @@ import cors from "cors";
 const app = express();
 import { dbConnection } from "./database/db.js";
 import routes from "./routes/index.js";
+import "dotenv/config";
 const PORT = process.env.PORT;
 
 const serverConnection = async () => {
