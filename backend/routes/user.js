@@ -1,5 +1,5 @@
 import { sign } from "jsonwebtoken";
-import { zodSchema } from "../database/zodSchema";
+import { signupUserSchema, updatesUserSchema } from "../database/zodSchema";
 import { User } from "../database/users";
 import { Router } from "express";
 import "dotenv/config";
@@ -7,10 +7,10 @@ import { authMiddleware } from "../middleware/authMiddleware";
 const router = Router();
 
 router.post("/signup", async (req, res) => {
+  const userDataInput = req.body;
   try {
     // const { fName, lName, userId, password } = req.body;
-    const userDataInput = req.body;
-    const zodValidation = await zodSchema.safeParse(userDataInput);
+    const zodValidation = await signupUserSchema.safeParse(userDataInput);
     if (!zodValidation.success) {
       return res.json({ error: zodValidation.data });
     }
@@ -34,8 +34,8 @@ router.post("/signup", async (req, res) => {
 });
 
 router.post("/signin", async (req, res) => {
+  const { userId, password } = req.body;
   try {
-    const { userId, password } = req.body;
     const userExist = await User.findOne({ userId, password });
     if (!userExist) {
       return res
@@ -56,30 +56,60 @@ router.post("/signin", async (req, res) => {
 });
 
 router.put("/", authMiddleware, async (req, res) => {
+  // const userId = req.userId;
+  const { password, firstName: fName, lastName: lName } = req.body;
   try {
-    const { password, fName, lName } = req.body;
-    const userId = req.userId;
-    const zodValidation = zodSchema.safeParse({
-      fName,
-      lName,
-      userId,
-      password,
-    });
+    // const zodValidation = zodSchema.safeParse({
+    //   fName,
+    //   lName,
+    //   userId,
+    //   password,
+    // });
+    // if (!zodValidation.success) {
+    //   return res.status(411).json({ error: zodValidation.data });
+    // }
+
+    let updates = {};
+    if (fName) {
+      updates.fName = fName;
+    }
+    if (lName) {
+      updates.lName = lName;
+    }
+    if (password) {
+      updates.password = password;
+    }
+
+    const zodValidation = updatesUserSchema.safeParse(updates);
     if (!zodValidation.success) {
       return res.status(411).json({ error: zodValidation.data });
     }
-    const userUpdate = await User.updateOne({
-      firstName: fName,
-      lastName: lName,
-      password,
-    });
-    await userUpdate.save();
-    res.status(200).json({ message: "Information updated successfully." });
+
+    const userUpdate = await User.updateOne(
+      { userId: req.userId },
+      { $set: updates }
+    );
+    if (!userUpdate) {
+      return res.status(404).json({ message: "User not found." });
+    } else if (!userUpdate.nModified) {
+      return res.status(200).json({ message: "No changes made." });
+    }
+    res.status(200).json({ message: "User updated successfully." });
   } catch (error) {
+    console.log(error);
     throw new Error("Internal Server Error.");
   }
 });
 
-router.get("/bulk?filter=:name", authMiddleware, async (req, res) => {});
+router.get("/bulk", authMiddleware, async (req, res) => {
+  const { filter } = req.query;
+  try {
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ error: "Unable to find search query. Internal server error." });
+  }
+});
 
 export default router;
