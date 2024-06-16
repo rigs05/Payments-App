@@ -7,4 +7,10 @@ const userSchema = new Schema({
   password: { type: String, required: true },
 });
 
+const accountSchema = new Schema({
+  userId: { type: String, required: true, unique: true },
+  balance: { type: Number }, // Ideally type is Int with float point representation
+});
+
 export const User = model("users", userSchema);
+export const Account = model("account", accountSchema);

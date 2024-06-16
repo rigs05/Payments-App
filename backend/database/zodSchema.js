@@ -10,6 +10,7 @@ export const signupUserSchema = z.object({
     .string()
     .min(8, { message: "Password must be minimum 8 characters." })
     .max(15, { message: "Password must not exceed 15 characters." }),
+  balance: z.number(),
 });
 
 export const updatesUserSchema = z.object({

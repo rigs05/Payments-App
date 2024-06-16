@@ -1,6 +1,6 @@
 import { sign } from "jsonwebtoken";
 import { signupUserSchema, updatesUserSchema } from "../database/zodSchema";
-import { User } from "../database/users";
+import { User, Account } from "../database/users";
 import { Router } from "express";
 import "dotenv/config";
 import { authMiddleware } from "../middleware/authMiddleware";
@@ -9,7 +9,7 @@ const router = Router();
 router.post("/signup", async (req, res) => {
   const userDataInput = req.body;
   try {
-    // const { fName, lName, userId, password } = req.body;
+    // const { fName, lName, userId, password, balance } = req.body;
     const zodValidation = await signupUserSchema.safeParse(userDataInput);
     if (!zodValidation.success) {
       return res.json({ error: zodValidation.data });
@@ -20,11 +20,21 @@ router.post("/signup", async (req, res) => {
         message: "User already exist in database, please login.",
       });
     }
-    userExist = new User(userDataInput);
+    userExist = new User({
+      firstName: userDataInput.firstName,
+      lastName: userDataInput.lastName,
+      userId: userDataInput.userId,
+      password: userDataInput.password,
+    });
+    const accountBalance = new Account({
+      userId: userDataInput.userId,
+      balance: balance,
+    });
     const token = sign({ userId: userExist.userId }, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
     await userExist.save();
+    await accountBalance.save();
     res
       .status(200)
       .json({ token: token, message: "User created successfully." });
@@ -101,9 +111,19 @@ router.put("/", authMiddleware, async (req, res) => {
   }
 });
 
+// Check this route
 router.get("/bulk", authMiddleware, async (req, res) => {
   const { filter } = req.query;
   try {
+    const name = new RegExp(filter, "g");
+    const userExist = await User.findOne({ name });
+    if (!userExist) {
+      return res.status(411).json({ message: "No such user." });
+    }
+    const list = userExist.map((user) => {
+      user.firstName, user.lastName, user._id;
+    });
+    res.status(200).json({ users: list });
   } catch (err) {
     console.error(err);
     res
