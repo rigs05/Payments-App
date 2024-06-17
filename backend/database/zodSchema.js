@@ -3,8 +3,8 @@ import { z } from "zod";
 // Could be made into a middleware
 
 export const signupUserSchema = z.object({
-  fName: z.string(),
-  lName: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
   userId: z.string().email({ message: "Enter a valid email." }),
   password: z
     .string()
@@ -14,8 +14,8 @@ export const signupUserSchema = z.object({
 });
 
 export const updatesUserSchema = z.object({
-  fName: z.string().optional(),
-  lName: z.string().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
   userId: z.string().email({ message: "Enter a valid email." }).optional(),
   password: z
     .string()

@@ -12,6 +12,6 @@ export const authMiddleware = (req, res, next) => {
     return res.status(403).json({ error: "Invalid token." });
   }
   req.userId = decodeToken.userId;
-  req.userName = decodeToken.fName;
+  req.userName = decodeToken.firstName;
   next();
 };

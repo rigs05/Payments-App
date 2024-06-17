@@ -9,7 +9,7 @@ const router = Router();
 router.post("/signup", async (req, res) => {
   const userDataInput = req.body;
   try {
-    // const { fName, lName, userId, password, balance } = req.body;
+    // const { firstName, lastName, userId, password, balance } = req.body;
     const zodValidation = await signupUserSchema.safeParse(userDataInput);
     if (!zodValidation.success) {
       return res.json({ error: zodValidation.data });
@@ -53,7 +53,7 @@ router.post("/signin", async (req, res) => {
         .json({ message: "Error while loggin in. Check userId or password." });
     }
     const token = sign(
-      { userId: userId, fName: userExist.fName },
+      { userId: userId, firstName: userExist.firstName },
       process.env.JWT_SECRET,
       {
         expiresIn: "7d",
@@ -67,11 +67,11 @@ router.post("/signin", async (req, res) => {
 
 router.put("/", authMiddleware, async (req, res) => {
   // const userId = req.userId;
-  const { password, firstName: fName, lastName: lName } = req.body;
+  const { password, firstName: firstName, lastName: lastName } = req.body;
   try {
     // const zodValidation = zodSchema.safeParse({
-    //   fName,
-    //   lName,
+    //   firstName,
+    //   lastName,
     //   userId,
     //   password,
     // });
@@ -80,11 +80,11 @@ router.put("/", authMiddleware, async (req, res) => {
     // }
 
     let updates = {};
-    if (fName) {
-      updates.fName = fName;
+    if (firstName) {
+      updates.firstName = firstName;
     }
-    if (lName) {
-      updates.lName = lName;
+    if (lastName) {
+      updates.lastName = lastName;
     }
     if (password) {
       updates.password = password;
