@@ -1,9 +1,9 @@
-import { sign } from "jsonwebtoken";
-import { signupUserSchema, updatesUserSchema } from "../database/zodSchema";
-import { User, Account } from "../database/users";
+import jwt from "jsonwebtoken";
+import { signupUserSchema, updatesUserSchema } from "../database/zodSchema.js";
+import { User, Account } from "../database/users.js";
 import { Router } from "express";
 import "dotenv/config";
-import { authMiddleware } from "../middleware/authMiddleware";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 const router = Router();
 
 router.post("/signup", async (req, res) => {
@@ -30,16 +30,20 @@ router.post("/signup", async (req, res) => {
       userId: userDataInput.userId,
       balance: balance,
     });
-    const token = sign({ userId: userExist.userId }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      { userId: userExist.userId },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
     await userExist.save();
     await accountBalance.save();
     res
       .status(200)
       .json({ token: token, message: "User created successfully." });
   } catch (error) {
-    throw new Error("Internal server error.");
+    throw new Error("Internal server error.\n" + error);
   }
 });
 
@@ -52,7 +56,7 @@ router.post("/signin", async (req, res) => {
         .status(411)
         .json({ message: "Error while loggin in. Check userId or password." });
     }
-    const token = sign(
+    const token = jwt.sign(
       { userId: userId, firstName: userExist.firstName },
       process.env.JWT_SECRET,
       {
@@ -61,7 +65,7 @@ router.post("/signin", async (req, res) => {
     );
     res.status(200).json({ token: token });
   } catch (error) {
-    throw new Error("Internal server error.");
+    throw new Error("Internal server error.\n" + error);
   }
 });
 
@@ -107,7 +111,7 @@ router.put("/", authMiddleware, async (req, res) => {
     res.status(200).json({ message: "User updated successfully." });
   } catch (error) {
     console.log(error);
-    throw new Error("Internal Server Error.");
+    throw new Error("Internal Server Error.\n" + error);
   }
 });
 

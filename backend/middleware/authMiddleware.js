@@ -1,4 +1,4 @@
-import { verify } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import "dotenv/config";
 
 export const authMiddleware = (req, res, next) => {
@@ -7,7 +7,7 @@ export const authMiddleware = (req, res, next) => {
   if (!token) {
     return res.status(401).json({ message: "Unauthorized access." });
   }
-  const decodeToken = verify(token, process.env.JWT_SECRET);
+  const decodeToken = jwt.verify(token, process.env.JWT_SECRET);
   if (!decodeToken) {
     return res.status(403).json({ error: "Invalid token." });
   }

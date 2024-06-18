@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { authMiddleware } from "../middleware/authMiddleware";
-import { User, Account } from "../database/users";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import { User, Account } from "../database/users.js";
 import mongoose from "mongoose";
 const router = Router();
 
