@@ -9,10 +9,14 @@ const router = Router();
 router.post("/signup", async (req, res) => {
   const userDataInput = req.body;
   try {
+    // console.log(userDataInput);
     // const { firstName, lastName, userId, password, balance } = req.body;
     const zodValidation = await signupUserSchema.safeParse(userDataInput);
     if (!zodValidation.success) {
-      return res.json({ error: zodValidation.data });
+      return res.json({
+        message: "Error occurred. Incorrect input data found.",
+        error: zodValidation.error,
+      });
     }
     let userExist = await User.findOne({ userId: userDataInput.userId });
     if (userExist) {
@@ -28,7 +32,7 @@ router.post("/signup", async (req, res) => {
     });
     const accountBalance = new Account({
       userId: userDataInput.userId,
-      balance: balance,
+      balance: userDataInput.balance,
     });
     const token = jwt.sign(
       { userId: userExist.userId },
@@ -43,7 +47,8 @@ router.post("/signup", async (req, res) => {
       .status(200)
       .json({ token: token, message: "User created successfully." });
   } catch (error) {
-    throw new Error("Internal server error.\n" + error);
+    console.error(error);
+    res.status(500).json({ message: "Internal server error." });
   }
 });
 
@@ -65,13 +70,14 @@ router.post("/signin", async (req, res) => {
     );
     res.status(200).json({ token: token });
   } catch (error) {
-    throw new Error("Internal server error.\n" + error);
+    console.error(error);
+    res.status(500).json({ message: "Internal server error." });
   }
 });
 
 router.put("/", authMiddleware, async (req, res) => {
   // const userId = req.userId;
-  const { password, firstName: firstName, lastName: lastName } = req.body;
+  const { password, firstName, lastName } = req.body;
   try {
     // const zodValidation = zodSchema.safeParse({
     //   firstName,
@@ -96,7 +102,7 @@ router.put("/", authMiddleware, async (req, res) => {
 
     const zodValidation = updatesUserSchema.safeParse(updates);
     if (!zodValidation.success) {
-      return res.status(411).json({ error: zodValidation.data });
+      return res.status(411).json({ message: "", error: zodValidation.error });
     }
 
     const userUpdate = await User.updateOne(
@@ -110,8 +116,8 @@ router.put("/", authMiddleware, async (req, res) => {
     }
     res.status(200).json({ message: "User updated successfully." });
   } catch (error) {
-    console.log(error);
-    throw new Error("Internal Server Error.\n" + error);
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error}." });
   }
 });
 
