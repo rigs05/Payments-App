@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/authMiddleware.js";
-import { User, Account } from "../database/users.js";
+import { Account } from "../database/users.js";
 import mongoose from "mongoose";
 const router = Router();
 
@@ -31,7 +31,7 @@ router.post("/transfer", authMiddleware, async (req, res) => {
     }
 
     // Check if receiver's account actually exist
-    const toAccount = await User.findOne({ userId: receiverUserId }).session(
+    const toAccount = await Account.findOne({ userId: receiverUserId }).session(
       session
     );
     if (!toAccount) {
@@ -40,23 +40,33 @@ router.post("/transfer", authMiddleware, async (req, res) => {
     }
 
     // Deduct money from sender account
-    await Account.updateOne({
-      userId: req.userId,
-      $inc: {
-        balance: -amount,
+    await Account.updateOne(
+      {
+        userId: req.userId,
       },
-    }).session(session);
+      {
+        $inc: {
+          balance: -amount,
+        },
+      }
+    ).session(session);
 
     // Add money in receiver account
-    await Account.updateOne({
-      userId: receiverUserId,
-      $inc: {
-        balance: amount,
+    await Account.updateOne(
+      {
+        userId: receiverUserId,
       },
-    }).session(session);
+      {
+        $inc: {
+          balance: amount,
+        },
+      }
+    ).session(session);
 
     await session.commitTransaction();
-    res.status(200).json({ message: "Transfer successful." });
+    res.status(200).json({
+      message: `Transfer successful. Amount ₹${amount} is credited to ${receiverUserId}.`,
+    });
     await session.endSession();
   } catch (err) {
     console.error(err);
