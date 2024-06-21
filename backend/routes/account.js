@@ -4,7 +4,7 @@ import { Account } from "../database/users.js";
 import mongoose from "mongoose";
 const router = Router();
 
-// To check balance
+// To check balance in logged-in user's account
 router.get("/balance", authMiddleware, async (req, res) => {
   try {
     const userBalance = await Account.findOne({ userId: req.userId });
@@ -14,14 +14,15 @@ router.get("/balance", authMiddleware, async (req, res) => {
   }
 });
 
-// To transfer the money
+// To transfer the money from logged-in user to recipient userId
 router.post("/transfer", authMiddleware, async (req, res) => {
+  // Using Mongoose Sessions to avoid/revert any interruptions during transaction in-progress
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
     const { amount, to: receiverUserId } = req.body;
 
-    // Check if balance in sender's account is sufficient
+    // Check if there's sufficient balance in sender's account
     const senderAccount = await Account.findOne({ userId: req.userId }).session(
       session
     );

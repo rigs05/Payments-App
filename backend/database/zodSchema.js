@@ -2,6 +2,7 @@ import { z } from "zod";
 
 // Could be made into a middleware
 
+// Zod Validation Schema for first time sign-up users
 export const signupUserSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
@@ -13,6 +14,7 @@ export const signupUserSchema = z.object({
   balance: z.number(),
 });
 
+// Zod Validation Schema for updated information of logged-in users (optional entities)
 export const updatesUserSchema = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),
