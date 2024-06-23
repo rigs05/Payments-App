@@ -6,30 +6,42 @@ import "dotenv/config";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 const router = Router();
 
+// Sign-up Route
 router.post("/signup", async (req, res) => {
   const userDataInput = req.body;
   try {
-    // const { firstName, lastName, userId, password, balance } = req.body;
+    // Zod Validation of input data
     const zodValidation = await signupUserSchema.safeParse(userDataInput);
     if (!zodValidation.success) {
-      return res.json({ error: zodValidation.data });
+      return res.json({
+        message: "Error occurred. Incorrect input data found.",
+        error: zodValidation.error,
+      });
     }
+
+    // Checking if user already exists in db
     let userExist = await User.findOne({ userId: userDataInput.userId });
     if (userExist) {
       return res.status(411).json({
         message: "User already exist in database, please login.",
       });
     }
+
+    // If not, create a new User model and save to the users db
     userExist = new User({
       firstName: userDataInput.firstName,
       lastName: userDataInput.lastName,
       userId: userDataInput.userId,
       password: userDataInput.password,
     });
+
+    // Create an account with initial balance in accounts db
     const accountBalance = new Account({
       userId: userDataInput.userId,
-      balance: balance,
+      balance: userDataInput.balance,
     });
+
+    // Create and return JWT token
     const token = jwt.sign(
       { userId: userExist.userId },
       process.env.JWT_SECRET,
@@ -43,19 +55,24 @@ router.post("/signup", async (req, res) => {
       .status(200)
       .json({ token: token, message: "User created successfully." });
   } catch (error) {
-    throw new Error("Internal server error.\n" + error);
+    console.error(error);
+    res.status(500).json({ message: "Internal server error." });
   }
 });
 
+// Sign-in Route
 router.post("/signin", async (req, res) => {
   const { userId, password } = req.body;
   try {
+    // Check if user exists in db
     const userExist = await User.findOne({ userId, password });
     if (!userExist) {
       return res
         .status(411)
         .json({ message: "Error while loggin in. Check userId or password." });
     }
+
+    // If user exists, return a JWT token along with userId as payload
     const token = jwt.sign(
       { userId: userId, firstName: userExist.firstName },
       process.env.JWT_SECRET,
@@ -65,24 +82,16 @@ router.post("/signin", async (req, res) => {
     );
     res.status(200).json({ token: token });
   } catch (error) {
-    throw new Error("Internal server error.\n" + error);
+    console.error(error);
+    res.status(500).json({ message: "Internal server error." });
   }
 });
 
+// User details update Route (Can update First Name, Last Name, and Password)
 router.put("/", authMiddleware, async (req, res) => {
-  // const userId = req.userId;
-  const { password, firstName: firstName, lastName: lastName } = req.body;
+  const { password, firstName, lastName } = req.body;
   try {
-    // const zodValidation = zodSchema.safeParse({
-    //   firstName,
-    //   lastName,
-    //   userId,
-    //   password,
-    // });
-    // if (!zodValidation.success) {
-    //   return res.status(411).json({ error: zodValidation.data });
-    // }
-
+    // Add all the given updated input in an Object
     let updates = {};
     if (firstName) {
       updates.firstName = firstName;
@@ -94,36 +103,47 @@ router.put("/", authMiddleware, async (req, res) => {
       updates.password = password;
     }
 
+    // Zod Validation of updated data (return appropriate error message if any)
     const zodValidation = updatesUserSchema.safeParse(updates);
     if (!zodValidation.success) {
-      return res.status(411).json({ error: zodValidation.data });
+      return res.status(411).json({ error: zodValidation.error });
     }
 
+    // Update the value in the db
     const userUpdate = await User.updateOne(
       { userId: req.userId },
       { $set: updates }
     );
+
     if (!userUpdate) {
       return res.status(404).json({ message: "User not found." });
-    } else if (!userUpdate.nModified) {
+    } else if (!userUpdate.modifiedCount) {
       return res.status(200).json({ message: "No changes made." });
     }
-    res.status(200).json({ message: "User updated successfully." });
+    res.status(200).json({
+      message: `User updated successfully. Changes made: ${Object.keys(
+        updates
+      )}`,
+    });
   } catch (error) {
-    console.log(error);
-    throw new Error("Internal Server Error.\n" + error);
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error}." });
   }
 });
 
-// Check this route
+// Check this route ; Search all the available Users in db using filter query
 router.get("/bulk", authMiddleware, async (req, res) => {
   const { filter } = req.query;
   try {
     const name = new RegExp(filter, "g");
+
+    // Check if queried user exists in db using keywords
     const userExist = await User.findOne({ name });
     if (!userExist) {
       return res.status(411).json({ message: "No such user." });
     }
+
+    // Return a list of similar user names
     const list = userExist.map((user) => {
       user.firstName, user.lastName, user._id;
     });

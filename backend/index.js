@@ -2,16 +2,15 @@ import express from "express";
 import cors from "cors";
 const app = express();
 import { dbConnection } from "./database/db.js";
-import routes from "./routes/index.js";
 import "dotenv/config";
 const PORT = process.env.PORT;
+import routes from "./routes/index.js";
 
 const serverConnection = async () => {
   try {
     await dbConnection().then(() => {
       console.log("Connection to database successful.");
     });
-
     app.use(express.json());
     app.use(cors());
     app.use("/api/v1", routes);
