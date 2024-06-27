@@ -1,5 +1,18 @@
+import { BrowserRouter } from "react-dom";
+
 function App() {
-  return <></>;
+  return (
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path='/signup' element={<Signup />} />
+          <Route path='/signin' element={<Signin />} />
+          <Route path='/dashboard' element={<Dashboard />} />
+          <Route path='/sendMoney' element={<SendMoney />} />
+        </Routes>
+      </BrowserRouter>
+    </>
+  );
 }
 
 export default App;

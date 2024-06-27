@@ -3,11 +3,10 @@ import "dotenv/config";
 
 export const authMiddleware = (req, res, next) => {
   // Fetch authorization header consisting of JWT token
-  const authHeader = req.headers.authorization;
+  const authHeader = req.headers["authorization"];
 
   // Split the token from any additional string, if any
   const token = authHeader && authHeader.split(" ")[1];
-
   if (!token) {
     return res.status(401).json({ message: "Unauthorized access." });
   }

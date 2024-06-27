@@ -10,8 +10,9 @@ const userSchema = new Schema({
 
 // User Account Schema
 const accountSchema = new Schema({
-  userId: { type: String, required: true, unique: true },
-  balance: { type: Number }, // Ideally type is Int with float point representation
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true }, // References to User Model
+  // userId: { type: String, required: true, unique: true },
+  balance: { type: Number, required: true }, // Ideally type is Int with float point representation
 });
 
 export const User = model("users", userSchema);

@@ -34,26 +34,21 @@ router.post("/signup", async (req, res) => {
       userId: userDataInput.userId,
       password: userDataInput.password,
     });
+    const savedUser = await userExist.save();
 
     // Create an account with initial balance in accounts db
     const accountBalance = new Account({
-      userId: userDataInput.userId,
+      userId: savedUser._id, // Save the User Id of created User
       balance: userDataInput.balance,
     });
 
-    // Create and return JWT token
-    const token = jwt.sign(
-      { userId: userExist.userId },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
-    await userExist.save();
     await accountBalance.save();
     res
       .status(200)
-      .json({ token: token, message: "User created successfully." });
+      .json({
+        message: `User ${userDataInput.firstName} created successfully. Please Login`,
+      });
+    // .json({ token: token, message: "User created successfully." });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error." });
@@ -135,17 +130,23 @@ router.put("/", authMiddleware, async (req, res) => {
 router.get("/bulk", authMiddleware, async (req, res) => {
   const { filter } = req.query;
   try {
-    const name = new RegExp(filter, "g");
+    const name = new RegExp(filter, "i");
 
     // Check if queried user exists in db using keywords
-    const userExist = await User.findOne({ name });
-    if (!userExist) {
+    const userExist = await User.find({
+      $or: [{ firstName: name }, { lastName: name }],
+    });
+    if (!userExist || userExist.length === 0) {
       return res.status(411).json({ message: "No such user." });
     }
 
     // Return a list of similar user names
     const list = userExist.map((user) => {
-      user.firstName, user.lastName, user._id;
+      return {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        userId: user._id,
+      };
     });
     res.status(200).json({ users: list });
   } catch (err) {
