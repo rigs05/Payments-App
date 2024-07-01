@@ -39,16 +39,16 @@ router.post("/signup", async (req, res) => {
     // Create an account with initial balance in accounts db
     const accountBalance = new Account({
       userId: savedUser._id, // Save the User Id of created User
-      balance: userDataInput.balance,
+      // balance: userDataInput.balance,
+      balance: Math.round(10000 * Math.random()), // Saving Random balance below 10000
     });
 
     await accountBalance.save();
-    res
-      .status(200)
-      .json({
-        message: `User ${userDataInput.firstName} created successfully. Please Login`,
-      });
-    // .json({ token: token, message: "User created successfully." });
+
+    /***** Sign up should directly redirect user to dashboard and NOT to login page *****/
+    res.status(200).json({
+      message: `User ${userDataInput.firstName} created successfully.`,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error." });
@@ -75,7 +75,21 @@ router.post("/signin", async (req, res) => {
         expiresIn: "7d",
       }
     );
-    res.status(200).json({ token: token });
+
+    // Sending Token inside Cookie
+    res.cookie("token", token, {
+      httpOnly: true, // Only server can read it, not client-JS
+      // secure: true,
+      sameSite: "none", // Will prevent sending cookie to target site
+      expires: new Date(Date.now() + 30 * 24 * 60 * 60), // 30 days from today
+    });
+
+    res.cookie("user", JSON.stringify({ firstName: userExist.firstName }), {
+      sameSite: "none",
+      secure: true,
+    });
+
+    res.status(200).json({ message: "Login successful." });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error." });
