@@ -18,8 +18,8 @@ const Signin = () => {
         {
           userId,
           password,
-        }
-        // { withCredentials: true } // Ensures sending the cookies along with request
+        },
+        { withCredentials: true } // Ensures sending the cookies along with request
       );
       if (response.status === 200) {
         console.log(response.data);

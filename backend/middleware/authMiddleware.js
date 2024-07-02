@@ -8,7 +8,8 @@ export const authMiddleware = (req, res, next) => {
   // const token = authHeader && authHeader.split(" ")[1];
 
   // Cookie based Authorization
-  const token = req.cookies.token;
+  const token = req.cookies.jwt;
+  // console.log("Extracted token from cookie: ", token);
   if (!token) {
     return res
       .status(401)

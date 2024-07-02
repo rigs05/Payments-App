@@ -77,15 +77,20 @@ router.post("/signin", async (req, res) => {
     );
 
     // Sending Token inside Cookie
-    res.cookie("token", token, {
+    res.cookie("jwt", token, {
       httpOnly: true, // Only server can read it, not client-JS
-      // secure: true,
-      sameSite: "none", // Will prevent sending cookie to target site
-      expires: new Date(Date.now() + 30 * 24 * 60 * 60), // 30 days from today
+      secure: true, // Only transfer cookie via HTTPS
+      sameSite: "Strict", // Will prevent sending cookie to target site
+      maxAge: 30 * 24 * 60 * 60, // 30 days from today
     });
 
-    res.cookie("user", JSON.stringify({ firstName: userExist.firstName }), {
-      sameSite: "none",
+    res.cookie("userId", userId, {
+      sameSite: "None",
+      secure: true,
+    });
+
+    res.cookie("user", userExist.firstName, {
+      sameSite: "None",
       secure: true,
     });
 

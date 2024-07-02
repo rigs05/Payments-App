@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Suspense, lazy } from "react";
+import LinkPage from "./components/LinkPage";
 const Signin = lazy(() => import("./pages/Signin"));
 const Signup = lazy(() => import("./pages/Signup"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -44,6 +45,7 @@ function App() {
               </Suspense>
             }
           />
+          <Route path='/link/:id' element={<LinkPage />} />
           <Route path='/send' element={sendFunction()} />
         </Routes>
         {/* </Suspense> */}

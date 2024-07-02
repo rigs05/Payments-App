@@ -1,14 +1,25 @@
 import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
+import axios from "axios";
+// import Cookies from "js-cookie";
 
 const Logout = () => {
   const navigate = useNavigate();
 
-  function handleLogout() {
-    Cookies.remove("token");
-    Cookies.remove("user");
-
-    navigate("/signin");
+  async function handleLogout() {
+    // e.preventDefault();
+    try {
+      await axios.post(
+        "http://localhost:3000/api/v1/logout",
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+      navigate("/signin");
+      console.log("Logout Successful.");
+    } catch (error) {
+      console.error("Cannot Logout: ", error);
+    }
   }
   return (
     <div>
