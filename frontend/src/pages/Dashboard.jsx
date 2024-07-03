@@ -5,13 +5,14 @@ import Cookies from "js-cookie";
 import axios from "axios";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
   const userName = Cookies.get("user");
   const [balance, setBalance] = useState(null);
   // const [query, setQuery] = useState("");
   // const [userList, setUserList] = useState("");
 
-  const randomLinks = [
+  /* // Dummy URL data for client-side cookie
+    const navigate = useNavigate();
+    const randomLinks = [
     { id: 1, url: "https://google.com" },
     { id: 2, url: "https://fb.com" },
     { id: 3, url: "https://instagram.com" },
@@ -19,15 +20,15 @@ const Dashboard = () => {
     { id: 5, url: "https://fastdl.app" },
     { id: 6, url: "https://geeksforgeeks.org" },
     { id: 7, url: "https://icpc.org" },
-  ];
+  ]; */
 
-  // Get Account balance
+  // GET Account balance
   useEffect(() => {
     const fetchBalance = async () => {
       try {
         const getBalance = await axios.get(
           "http://localhost:3000/api/v1/account/balance",
-          { withCredentials: true }
+          { withCredentials: true } // Ensures cookie is passed with every request
         );
         setBalance(getBalance.data.balance);
       } catch (error) {
@@ -38,12 +39,12 @@ const Dashboard = () => {
   }, []);
 
   // Saving clicked Url data in a cookie for future references
-  const handleURLClick = (id, url) => {
+  /* const handleURLClick = (id, url) => {
     const user = Cookies.get("userId");
     Cookies.set(`link_${user}_${id}`, url, { expires: 7 });
-    // From here, we can send the cookie back to Backend
-    navigate(`/link/${id}`);
-  };
+    // From here, we can send the data-laden cookie back to Backend using Axios
+    navigate(`/link/${id}`); // To route the redirection from the React-Router & not directly
+  }; */
 
   // Get User data
   // function handleUserSearch() {
@@ -80,8 +81,9 @@ const Dashboard = () => {
           className='my-4 p-2 w-1/3 border border-black rounded-md'
           // onInput={handleUserSearch}
         />
+
         {/* Display URLs */}
-        <ul>
+        {/* <ul>
           {randomLinks.map((link) => {
             const user = Cookies.get("userId");
             const visited = Cookies.get(`link_${user}_${link.id}`);
@@ -100,7 +102,7 @@ const Dashboard = () => {
               </li>
             );
           })}
-        </ul>
+        </ul> */}
       </div>
     </div>
   );

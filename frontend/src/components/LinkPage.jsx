@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 
@@ -7,7 +7,6 @@ import Cookies from "js-cookie";
 function LinkPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  //   const [url, setUrl] = useState("");
 
   useEffect(() => {
     const user = Cookies.get("userId");
@@ -24,8 +23,5 @@ function LinkPage() {
   }, [id, navigate]);
 
   return null;
-  // <div>
-  //   <h1>Redirecting to {url}</h1>
-  // </div>
 }
 export default LinkPage;

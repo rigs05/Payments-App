@@ -25,6 +25,7 @@ function App() {
             path='/signin'
             element={
               <Suspense fallback='Loading...'>
+                {/* write a function that redirects to dashboard if cookie is found else to signin */}
                 <Signin />
               </Suspense>
             }
@@ -33,20 +34,21 @@ function App() {
             path='/dashboard'
             element={
               <Suspense fallback='Loading...'>
+                {/* write a function that redirects to signin if cookie NOT found */}
                 <Dashboard />
               </Suspense>
             }
           />
           <Route
-            path='/sendMoney'
+            path='/send'
             element={
               <Suspense fallback='Loading...'>
                 <SendMoney />
               </Suspense>
             }
           />
-          <Route path='/link/:id' element={<LinkPage />} />
-          <Route path='/send' element={sendFunction()} />
+          {/* Route for redirecting the URL and storing clicked-url data in cookie */}
+          {/* <Route path='/link/:id' element={<LinkPage />} /> */}
         </Routes>
         {/* </Suspense> */}
       </BrowserRouter>
