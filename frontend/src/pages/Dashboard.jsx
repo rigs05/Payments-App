@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Logout from "../components/Logout";
 import Cookies from "js-cookie";
 import axios from "axios";
+import UserData from "../components/UserData";
+import UserLogo from "../components/UserLogo";
 
 const Dashboard = () => {
   const userName = Cookies.get("user");
@@ -65,7 +67,10 @@ const Dashboard = () => {
       <div className='topBar py-2'>
         <div className='flex'>
           <div className='font-bold text-indigo-500'>PAYMENTS APPLICATION</div>
-          <div className='ml-auto font-semibold'>Hello {userName}</div>
+          <div className='flex justify-center items-center p-2 gap-2 ml-auto font-semibold'>
+            <span>Hello {userName}</span>
+            <UserLogo name={userName} />
+          </div>
         </div>
         <div className='py-2 w-fit ml-auto'>
           <Logout />
@@ -81,6 +86,14 @@ const Dashboard = () => {
           className='my-4 p-2 w-1/3 border border-black rounded-md'
           // onInput={handleUserSearch}
         />
+
+        <div>
+          <UserData key={1} name={"test1"} />
+          <UserData key={2} name={"abhi"} />
+          <UserData key={3} name={"joker"} />
+          <UserData key={4} name={"harry"} />
+          <UserData key={5} name={"unkil"} />
+        </div>
 
         {/* Display URLs */}
         {/* <ul>

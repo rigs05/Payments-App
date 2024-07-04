@@ -149,6 +149,19 @@ router.put("/", authMiddleware, async (req, res) => {
 router.get("/bulk", authMiddleware, async (req, res) => {
   const { filter } = req.query;
   try {
+    if (!filter) {
+      const users = await User.find();
+      const userList = await users
+        .filter((user) => user.userId !== user.userId)
+        .map((user) => {
+          return {
+            _id: user._id,
+            name: `${user.firstName} ${user.lastName}`,
+          };
+        });
+      console.log(userList);
+      return res.status(200).json({ userList });
+    }
     const name = new RegExp(filter, "i");
 
     // Check if queried user exists in db using keywords
