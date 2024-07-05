@@ -10,7 +10,7 @@ const Dashboard = () => {
   const userName = Cookies.get("user");
   const [balance, setBalance] = useState(null);
   // const [query, setQuery] = useState("");
-  // const [userList, setUserList] = useState("");
+  const [userList, setUserList] = useState([]);
 
   /* // Dummy URL data for client-side cookie
     const navigate = useNavigate();
@@ -40,27 +40,32 @@ const Dashboard = () => {
     fetchBalance();
   }, []);
 
-  // Saving clicked Url data in a cookie for future references
+  // Get User data
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const result = await axios.get(
+          "http://localhost:3000/api/v1/user/bulk",
+          {
+            withCredentials: true,
+          }
+        );
+        // console.log(result.data.userList);
+        setUserList(result.data.userList);
+      } catch (err) {
+        console.error("Error fetching Users.", err);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  // Saving clicked Url data in a Cookie for future references
   /* const handleURLClick = (id, url) => {
     const user = Cookies.get("userId");
     Cookies.set(`link_${user}_${id}`, url, { expires: 7 });
     // From here, we can send the data-laden cookie back to Backend using Axios
     navigate(`/link/${id}`); // To route the redirection from the React-Router & not directly
   }; */
-
-  // Get User data
-  // function handleUserSearch() {
-  // useEffect(() => {
-  //   const userList = async () => {
-  //     try {
-  //       const result = await axios.get("");
-  //       setUserList(result.data);
-  //     } catch (err) {
-  //       console.error("Error fetching Users.", err);
-  //     }
-  //   };
-  // }, []);
-  // }
 
   return (
     <div className='p-6 m-6 w-4/5 border shadow-md rounded-md bg-gray-100'>
@@ -88,11 +93,9 @@ const Dashboard = () => {
         />
 
         <div>
-          <UserData key={1} name={"test1"} />
-          <UserData key={2} name={"abhi"} />
-          <UserData key={3} name={"joker"} />
-          <UserData key={4} name={"harry"} />
-          <UserData key={5} name={"unkil"} />
+          {userList.map((user) => {
+            return <UserData key={user._id} id={user._id} name={user.name} />;
+          })}
         </div>
 
         {/* Display URLs */}
