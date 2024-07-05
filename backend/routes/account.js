@@ -40,11 +40,12 @@ router.post("/transfer", authMiddleware, async (req, res) => {
     }
 
     // Check if receiver's account actually exist
-    const recUser = await User.findOne({ userId: receiverUserId });
-    if (!recUser) {
-      return res.status(404).json({ message: "Receiver User does not exist." });
-    }
-    const toAccount = await Account.findOne({ userId: recUser._id }).session(
+    const recUser = await User.findOne({ _id: receiverUserId });
+    // const recUser = await User.findOne({ userId: receiverUserId });
+    // if (!recUser) {
+    //   return res.status(404).json({ message: "Receiver User does not exist." });
+    // }
+    const toAccount = await Account.findOne({ userId: receiverUserId }).session(
       session
     );
     if (!toAccount) {
@@ -67,7 +68,7 @@ router.post("/transfer", authMiddleware, async (req, res) => {
     // Add money in receiver account
     await Account.updateOne(
       {
-        userId: recUser._id,
+        userId: receiverUserId,
       },
       {
         $inc: {
@@ -78,7 +79,7 @@ router.post("/transfer", authMiddleware, async (req, res) => {
 
     await session.commitTransaction();
     res.status(200).json({
-      message: `Transfer successful. Amount ₹${amount} is credited to ${receiverUserId}.`,
+      message: `Transfer successful. Amount ₹${amount} is credited to ${recUser.userId}.`,
     });
     await session.endSession();
   } catch (err) {

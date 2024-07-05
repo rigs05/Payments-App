@@ -80,8 +80,8 @@ router.post("/signin", async (req, res) => {
     res.cookie("jwt", token, {
       httpOnly: true, // Only server can read it, not client-JS
       secure: true, // Only transfer cookie via HTTPS
-      sameSite: "Strict", // Will prevent sending cookie to target site
-      maxAge: 30 * 24 * 60 * 60, // 30 days from today
+      sameSite: "Lax", // Will prevent sending cookie to target site
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days from today
     });
 
     res.cookie("userId", userId, {
@@ -151,15 +151,15 @@ router.get("/bulk", authMiddleware, async (req, res) => {
   try {
     if (!filter) {
       const users = await User.find();
-      const userList = await users
-        .filter((user) => user.userId !== user.userId)
+      const userList = users
+        .filter((user) => user.userId !== req.userId)
         .map((user) => {
           return {
             _id: user._id,
             name: `${user.firstName} ${user.lastName}`,
           };
         });
-      console.log(userList);
+      // console.log("User list accessed.");
       return res.status(200).json({ userList });
     }
     const name = new RegExp(filter, "i");
