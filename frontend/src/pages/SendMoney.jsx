@@ -10,16 +10,11 @@ const SendMoney = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { userName: name, sendTo: to } = location.state || {};
-  // console.log("receiver id: " + to);
-  // console.log("sender name: " + name);
 
   const handleAmount = async (e) => {
     e.preventDefault();
     setError(null);
     try {
-      // if (!amount) {
-      //   return setError("Enter Amount");
-      // }
       await axios
         .post(
           "http://localhost:3000/api/v1/account/transfer",
@@ -39,6 +34,9 @@ const SendMoney = () => {
           setTimeout(() => {
             navigate("/dashboard");
           }, 5000);
+        })
+        .catch((err) => {
+          setMessage(err.data.message);
         });
     } catch (err) {
       console.error("Failed to transfer money." + err);
@@ -53,7 +51,7 @@ const SendMoney = () => {
         <span className='pt-2 pb-5 font-bold'>{name.toUpperCase()}</span>
       </div>
       <input
-        className='border border-gray-500 width-fit p-2 rounded-sm placeholder:italic placeholder:text-center text-center text-lg font-semibold'
+        className='border border-gray-500 width-fit p-2 rounded-sm placeholder:text-sm placeholder:text-center text-center text-lg font-semibold'
         outline='none'
         type='number'
         inputMode='numeric'

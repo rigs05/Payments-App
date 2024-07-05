@@ -9,8 +9,8 @@ import UserLogo from "../components/UserLogo";
 const Dashboard = () => {
   const userName = Cookies.get("user");
   const [balance, setBalance] = useState(null);
-  // const [query, setQuery] = useState("");
   const [userList, setUserList] = useState([]);
+  const [query, setQuery] = useState("");
 
   /* // Dummy URL data for client-side cookie
     const navigate = useNavigate();
@@ -40,7 +40,7 @@ const Dashboard = () => {
     fetchBalance();
   }, []);
 
-  // Get User data
+  // GET User data OR Search query if any
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -59,6 +59,25 @@ const Dashboard = () => {
     fetchUsers();
   }, []);
 
+  // Handle User Search Queries
+  useEffect(() => {
+    const searchUser = async () => {
+      try {
+        const result = await axios.get(
+          `http://localhost:3000/api/v1/user/bulk?filter=${query}`,
+          {
+            withCredentials: true,
+          }
+        );
+        setUserList(result.data.userList);
+      } catch (err) {
+        console.error("Invalid search query."); // will also return Status 411 on console
+        setUserList([]);
+      }
+    };
+    searchUser();
+  }, [query]);
+
   // Saving clicked Url data in a Cookie for future references
   /* const handleURLClick = (id, url) => {
     const user = Cookies.get("userId");
@@ -67,6 +86,7 @@ const Dashboard = () => {
     navigate(`/link/${id}`); // To route the redirection from the React-Router & not directly
   }; */
 
+  // Issue: Can be refactored
   return (
     <div className='p-6 m-6 w-4/5 border shadow-md rounded-md bg-gray-100'>
       <div className='topBar py-2'>
@@ -89,7 +109,10 @@ const Dashboard = () => {
           type='search'
           placeholder='Search users...'
           className='my-4 p-2 w-1/3 border border-black rounded-md'
-          // onInput={handleUserSearch}
+          onInput={(e) => {
+            e.preventDefault();
+            setQuery(e.target.value);
+          }}
         />
 
         <div>
@@ -98,7 +121,7 @@ const Dashboard = () => {
           })}
         </div>
 
-        {/* Display URLs */}
+        {/* Display URLs: Using cookie to store client-side data; highlighting URLs here */}
         {/* <ul>
           {randomLinks.map((link) => {
             const user = Cookies.get("userId");

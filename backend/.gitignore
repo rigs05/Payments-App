@@ -1,5 +1,6 @@
 /node_modules
 package-lock.json
 .env
+/database/zodMiddleware.js
 
 ALL the files are ok now

@@ -69,14 +69,6 @@ const Signup = () => {
         >
           Sign Up
         </button>
-        {/* <div>
-            <label className='block text-gray-700'>First Name</label>
-            <input
-              type='text'
-              placeholder='John'
-              onChange={(e) => setFirstName(e.target.value)}
-              className='mt-1 mb-2 block w-full px-5 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-            /> */}
       </form>
       <div>
         <p className='text-sm'>

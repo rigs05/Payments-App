@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import LinkPage from "./components/LinkPage";
+const Me = lazy(() => import("./components/Me"));
 const Signin = lazy(() => import("./pages/Signin"));
 const Signup = lazy(() => import("./pages/Signup"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -10,9 +11,15 @@ function App() {
   return (
     <div className='min-h-screen flex items-center justify-center bg-slate-100'>
       <BrowserRouter>
-        {/* <Suspense fallback='load'> */}
         <Routes>
-          {/* <Route path='/signup' element={<Signup />} /> */}
+          <Route
+            path='/'
+            element={
+              <Suspense fallback={"loading..."}>
+                <Me />
+              </Suspense>
+            }
+          />
           <Route
             path='/signup'
             element={
@@ -25,7 +32,7 @@ function App() {
             path='/signin'
             element={
               <Suspense fallback='Loading...'>
-                {/* write a function that redirects to dashboard if cookie is found else to signin */}
+                {/* Issue: write a function that redirects to dashboard if cookie is found else to signin */}
                 <Signin />
               </Suspense>
             }
@@ -34,7 +41,7 @@ function App() {
             path='/dashboard'
             element={
               <Suspense fallback='Loading...'>
-                {/* write a function that redirects to signin if cookie NOT found */}
+                {/* Issue: write a function that redirects to signin if cookie NOT found */}
                 <Dashboard />
               </Suspense>
             }
@@ -50,12 +57,9 @@ function App() {
           {/* Route for redirecting the URL and storing clicked-url data in cookie */}
           {/* <Route path='/link/:id' element={<LinkPage />} /> */}
         </Routes>
-        {/* </Suspense> */}
       </BrowserRouter>
     </div>
   );
 }
 
 export default App;
-
-function sendFunction() {}

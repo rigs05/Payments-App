@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import InputBox from "../components/InputBox";
+import Me from "../components/Me";
 
 const Signin = () => {
   const [userId, setUserId] = useState("");
@@ -38,8 +39,9 @@ const Signin = () => {
     }
   };
 
-  /* Refactor these handle functions in a way that reduces re-rendering of components
+  /* Issue: Refactor these handle functions in a way that reduces re-rendering of components
     after input userId & pass */
+
   // To clear any errors
   const handleUserId = useCallback((e) => {
     setError(""); // Will reset the error text (Invalid credentials) on the page
@@ -57,47 +59,51 @@ const Signin = () => {
   };
 
   return (
-    <div className='p-6 px-12 bg-gray-100 rounded-xl shadow-md space-y-4'>
-      <h1 className='text-xl font-semibold'>Login</h1>
-      <form onSubmit={handleLoginSubmit}>
-        <InputBox
-          label={"User Id"}
-          type={"email"}
-          placeholder={"john@gmail.com"}
-          onChange={handleUserId}
-          // Old Inline code:
-          /* onChange={(e) => {
-            setUserId(e.target.value);
-          }} */
-        />
-        <InputBox
-          label={"Password"}
-          type={"password"}
-          placeholder={"********"}
-          onChange={handleUserPassword}
-        />
+    <>
+      {/* Check and redirect user as per login status */}
+      <Me />
 
-        {/* Error message field */}
+      <div className='p-6 px-12 bg-gray-100 rounded-xl shadow-md space-y-4'>
+        <h1 className='text-xl font-semibold'>Login</h1>
+        <form onSubmit={handleLoginSubmit}>
+          <InputBox
+            label={"User Id"}
+            type={"email"}
+            placeholder={"john@gmail.com"}
+            onChange={handleUserId}
+          />
+          <InputBox
+            label={"Password"}
+            type={"password"}
+            placeholder={"********"}
+            onChange={handleUserPassword}
+          />
+
+          {/* Error message field */}
+          <div>
+            <p className='text-md text-red-800'>{error}</p>
+          </div>
+          <button
+            type='submit'
+            className='mt-5 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700'
+          >
+            Sign In
+          </button>
+        </form>
         <div>
-          <p className='text-md text-red-800'>{error}</p>
+          <p className='text-sm'>
+            Don't have an Account?
+            <span
+              onClick={handleSignUp}
+              className='font-semibold text-blue-600'
+            >
+              <a href=''> Signup </a>
+            </span>
+            here.
+          </p>
         </div>
-        <button
-          type='submit'
-          className='mt-5 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700'
-        >
-          Sign In
-        </button>
-      </form>
-      <div>
-        <p className='text-sm'>
-          Don't have an Account?
-          <span onClick={handleSignUp} className='font-semibold text-blue-600'>
-            <a href=''> Signup </a>
-          </span>
-          here.
-        </p>
       </div>
-    </div>
+    </>
   );
 };
 

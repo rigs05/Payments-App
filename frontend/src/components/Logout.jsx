@@ -1,12 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-// import Cookies from "js-cookie";
 
 const Logout = () => {
   const navigate = useNavigate();
 
-  async function handleLogout() {
-    // e.preventDefault();
+  async function handleLogout(e) {
+    e.preventDefault();
     try {
       await axios.post(
         "http://localhost:3000/api/v1/logout",

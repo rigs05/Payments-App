@@ -6,6 +6,11 @@ import "dotenv/config";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 const router = Router();
 
+// Verify Users (for redirection of signed users to Dash & unsigned users to login)
+router.get("/me", authMiddleware, (_req, res) => {
+  res.status(200).json({ message: "User valid and signed in." });
+});
+
 // Sign-up Route
 router.post("/signup", async (req, res) => {
   const userDataInput = req.body;
@@ -102,6 +107,7 @@ router.post("/signin", async (req, res) => {
 });
 
 // User details update Route (Can update First Name, Last Name, and Password)
+// Make Frontend page
 router.put("/", authMiddleware, async (req, res) => {
   const { password, firstName, lastName } = req.body;
   try {
@@ -150,37 +156,43 @@ router.get("/bulk", authMiddleware, async (req, res) => {
   const { filter } = req.query;
   try {
     if (!filter) {
-      const users = await User.find();
+      const users = await User.find({ userId: { $ne: req.userId } });
       const userList = users
-        .filter((user) => user.userId !== req.userId)
+        // .filter((user) => user.userId !== req.userId)
         .map((user) => {
           return {
             _id: user._id,
             name: `${user.firstName} ${user.lastName}`,
           };
         });
-      // console.log("User list accessed.");
+      // console.log("User list accessed: ", userList);
       return res.status(200).json({ userList });
     }
     const name = new RegExp(filter, "i");
 
     // Check if queried user exists in db using keywords
+    // const userExist = await User.find({ $and: [{
+    //   $or: [{ firstName: name }, { lastName: name }]},
+    // {userId: {$ne: {req.userId}
+    // });
     const userExist = await User.find({
-      $or: [{ firstName: name }, { lastName: name }],
+      $and: {
+        userId: { $ne: req.userId },
+        $or: [{ firstName: name }, { lastName: name }],
+      },
     });
     if (!userExist || userExist.length === 0) {
-      return res.status(411).json({ message: "No such user." });
+      return res.status(411).json({ message: "No user with such query." });
     }
 
     // Return a list of similar user names
     const list = userExist.map((user) => {
       return {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        userId: user._id,
+        _id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
       };
     });
-    res.status(200).json({ users: list });
+    res.status(200).json({ userList: list });
   } catch (err) {
     console.error(err);
     res

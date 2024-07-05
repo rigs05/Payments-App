@@ -3,7 +3,7 @@ const router = Router();
 
 router.post("/", async (_req, res) => {
   try {
-    console.log("Signout request incoming to server.");
+    console.log("Signout request incoming to server at " + new Date());
     await res.clearCookie("jwt", {
       httpOnly: true,
       secure: true,

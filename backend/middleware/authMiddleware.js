@@ -4,12 +4,10 @@ import "dotenv/config";
 export const authMiddleware = (req, res, next) => {
   // Fetch authorization header consisting of JWT token
   // const authHeader = req.headers["authorization"];
-
   // const token = authHeader && authHeader.split(" ")[1];
 
   // Cookie based Authorization
   const token = req.cookies.jwt;
-  // console.log("Extracted token from cookie: ", token);
   if (!token) {
     return res
       .status(401)

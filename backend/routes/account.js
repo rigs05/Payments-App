@@ -24,6 +24,9 @@ router.post("/transfer", authMiddleware, async (req, res) => {
   const session = await mongoose.startSession();
   const { amount, to: receiverUserId } = req.body;
   try {
+    if (amount <= 0) {
+      return;
+    }
     session.startTransaction();
     // Fetch User details
     const user = await User.findOne({ userId: req.userId });
@@ -41,10 +44,6 @@ router.post("/transfer", authMiddleware, async (req, res) => {
 
     // Check if receiver's account actually exist
     const recUser = await User.findOne({ _id: receiverUserId });
-    // const recUser = await User.findOne({ userId: receiverUserId });
-    // if (!recUser) {
-    //   return res.status(404).json({ message: "Receiver User does not exist." });
-    // }
     const toAccount = await Account.findOne({ userId: receiverUserId }).session(
       session
     );
