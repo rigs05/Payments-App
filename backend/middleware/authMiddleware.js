@@ -3,13 +3,15 @@ import "dotenv/config";
 
 export const authMiddleware = (req, res, next) => {
   // Fetch authorization header consisting of JWT token
-  const authHeader = req.headers.authorization;
+  // const authHeader = req.headers["authorization"];
+  // const token = authHeader && authHeader.split(" ")[1];
 
-  // Split the token from any additional string, if any
-  const token = authHeader && authHeader.split(" ")[1];
-
+  // Cookie based Authorization
+  const token = req.cookies.jwt;
   if (!token) {
-    return res.status(401).json({ message: "Unauthorized access." });
+    return res
+      .status(401)
+      .json({ message: "Access Denied. Unauthorized access." });
   }
 
   // Verify the token and return the payload as request call (i.e. userId)

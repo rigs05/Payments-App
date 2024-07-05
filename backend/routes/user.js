@@ -6,6 +6,11 @@ import "dotenv/config";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 const router = Router();
 
+// Verify Users (for redirection of signed users to Dash & unsigned users to login)
+router.get("/me", authMiddleware, (_req, res) => {
+  res.status(200).json({ message: "User valid and signed in." });
+});
+
 // Sign-up Route
 router.post("/signup", async (req, res) => {
   const userDataInput = req.body;
@@ -34,26 +39,21 @@ router.post("/signup", async (req, res) => {
       userId: userDataInput.userId,
       password: userDataInput.password,
     });
+    const savedUser = await userExist.save();
 
     // Create an account with initial balance in accounts db
     const accountBalance = new Account({
-      userId: userDataInput.userId,
-      balance: userDataInput.balance,
+      userId: savedUser._id, // Save the User Id of created User
+      // balance: userDataInput.balance,
+      balance: Math.round(10000 * Math.random()), // Saving Random balance below 10000
     });
 
-    // Create and return JWT token
-    const token = jwt.sign(
-      { userId: userExist.userId },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
-    await userExist.save();
     await accountBalance.save();
-    res
-      .status(200)
-      .json({ token: token, message: "User created successfully." });
+
+    /***** Sign up should directly redirect user to dashboard and NOT to login page *****/
+    res.status(200).json({
+      message: `User ${userDataInput.firstName} created successfully.`,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error." });
@@ -80,7 +80,26 @@ router.post("/signin", async (req, res) => {
         expiresIn: "7d",
       }
     );
-    res.status(200).json({ token: token });
+
+    // Sending Token inside Cookie
+    res.cookie("jwt", token, {
+      httpOnly: true, // Only server can read it, not client-JS
+      secure: true, // Only transfer cookie via HTTPS
+      sameSite: "Lax", // Will prevent sending cookie to target site
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days from today
+    });
+
+    res.cookie("userId", userId, {
+      sameSite: "None",
+      secure: true,
+    });
+
+    res.cookie("user", userExist.firstName, {
+      sameSite: "None",
+      secure: true,
+    });
+
+    res.status(200).json({ message: "Login successful." });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error." });
@@ -88,6 +107,7 @@ router.post("/signin", async (req, res) => {
 });
 
 // User details update Route (Can update First Name, Last Name, and Password)
+// Make Frontend page
 router.put("/", authMiddleware, async (req, res) => {
   const { password, firstName, lastName } = req.body;
   try {
@@ -135,19 +155,44 @@ router.put("/", authMiddleware, async (req, res) => {
 router.get("/bulk", authMiddleware, async (req, res) => {
   const { filter } = req.query;
   try {
-    const name = new RegExp(filter, "g");
+    if (!filter) {
+      const users = await User.find({ userId: { $ne: req.userId } });
+      const userList = users
+        // .filter((user) => user.userId !== req.userId)
+        .map((user) => {
+          return {
+            _id: user._id,
+            name: `${user.firstName} ${user.lastName}`,
+          };
+        });
+      // console.log("User list accessed: ", userList);
+      return res.status(200).json({ userList });
+    }
+    const name = new RegExp(filter, "i");
 
     // Check if queried user exists in db using keywords
-    const userExist = await User.findOne({ name });
-    if (!userExist) {
-      return res.status(411).json({ message: "No such user." });
+    // const userExist = await User.find({ $and: [{
+    //   $or: [{ firstName: name }, { lastName: name }]},
+    // {userId: {$ne: {req.userId}
+    // });
+    const userExist = await User.find({
+      $and: {
+        userId: { $ne: req.userId },
+        $or: [{ firstName: name }, { lastName: name }],
+      },
+    });
+    if (!userExist || userExist.length === 0) {
+      return res.status(411).json({ message: "No user with such query." });
     }
 
     // Return a list of similar user names
     const list = userExist.map((user) => {
-      user.firstName, user.lastName, user._id;
+      return {
+        _id: user._id,
+        name: `${user.firstName} ${user.lastName}`,
+      };
     });
-    res.status(200).json({ users: list });
+    res.status(200).json({ userList: list });
   } catch (err) {
     console.error(err);
     res
